@@ -34,6 +34,8 @@ export class AuthService {
         const newUser = await this.usersService.create({ name, email, password: hashedPassword });
 
         const tokens = await this.generateToken(newUser._id.toString(), email);
+        const hashedRefresh = await bcrypt.hash(tokens.refreshToken, 10);
+        await this.usersService.setRefreshToken(newUser._id.toString(), hashedRefresh);
         return { newUser, ...tokens };
     }
 
@@ -47,6 +49,43 @@ export class AuthService {
         if (!match) throw new UnauthorizedException('Invalid credentials');
 
         const tokens = await this.generateToken(user._id.toString(), email);
+        const hashedRefresh = await bcrypt.hash(tokens.refreshToken, 10);
+        await this.usersService.setRefreshToken(user._id.toString(), hashedRefresh);
+
         return { user, ...tokens };
     }
+
+
+    async refreshTokens(refreshToken: string) {
+        const data = this.jwtService.decode(refreshToken) as any;
+        if (!data) throw new UnauthorizedException('Invalid refresh token');
+
+        const userId = data.id;
+        const user = await this.usersService.findById(userId);
+
+        if (!user || !user.hashedRefreshToken)
+            throw new UnauthorizedException('Access denied');
+
+        const tokenMatches = await bcrypt.compare(
+            refreshToken,
+            user.hashedRefreshToken,
+        );
+
+        if (!tokenMatches) throw new UnauthorizedException('Access denied');
+
+        
+        const newTokens = await this.generateToken(userId, user.email);
+
+        
+        const newHashed = await bcrypt.hash(newTokens.refreshToken, 10);
+        await this.usersService.setRefreshToken(userId, newHashed);
+
+        return newTokens;
+    }
+
+    async logout(userId: string) {
+        await this.usersService.removeRefreshToken(userId);
+        return {message : "logged out"}
+    }
+
 }

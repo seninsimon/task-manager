@@ -15,4 +15,20 @@ export class UsersService {
     async findByEmail(email: string): Promise<UserDocument | null> {
         return this.userModel.findOne({ email });
     }
+
+
+    async setRefreshToken(userId : string , hashedtoken : string)
+    {
+        await this.userModel.findByIdAndUpdate( userId , {hashedRefreshToken : hashedtoken})
+    }
+
+
+    async removeRefreshToken(userId : string)
+    {
+        await this.userModel.findByIdAndUpdate(userId , {hashedRefreshToken : null});
+    }
+
+    async findById(userId : string) : Promise<UserDocument | null>{
+        return this.userModel.findById(userId)
+    }
 }
