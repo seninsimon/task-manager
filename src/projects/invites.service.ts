@@ -1,9 +1,9 @@
-    import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ProjectInvite, ProjectInviteDocument, InviteStatus } from './shemas/project-invite.schema';
 import { Model } from 'mongoose';
 import { Project, ProjectDocument } from './shemas/project.schema';
-import { Notification  } from './shemas/notification.schema';
+import { Notification } from '../notifications/schemas/notification.schema';
 
 @Injectable()
 export class InvitesService {
@@ -11,7 +11,7 @@ export class InvitesService {
     @InjectModel(ProjectInvite.name) private inviteModel: Model<ProjectInviteDocument>,
     @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
     @InjectModel(Notification.name) private notificationModel: Model<any>,
-  ) {}
+  ) { }
 
   async acceptInvite(userId: string, token: string) {
     const invite = await this.inviteModel.findOne({ inviteToken: token });

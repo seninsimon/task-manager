@@ -17,11 +17,14 @@ export class Project {
     owner: Types.ObjectId
 
 
-    @Prop({ type: [{ type: Types.ObjectId, ref: "user" }], default: [] })
+    @Prop({ type: [{ type: Types.ObjectId, ref: "User" }], default: [] })
     members: Types.ObjectId[];
 
     @Prop({ required: true, unique: true })
     inviteToken: string;
+
+    @Prop({ type: Types.ObjectId, ref: "Company", required: true })
+    company: Types.ObjectId;
 
 }
 
