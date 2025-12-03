@@ -8,7 +8,7 @@ export class NotificationsService {
   constructor(
     @InjectModel(Notification.name)
     private notificationModel: Model<NotificationDocument>
-  ) {}
+  ) { }
 
   // Get notifications for user
   async getMyNotifications(userId: string) {
@@ -42,4 +42,20 @@ export class NotificationsService {
     );
     return { message: "All notifications marked as read" };
   }
+
+
+  async createNotification(payload: {
+    user: string | Types.ObjectId;
+    title: string;
+    body: string;
+    data?: any;
+  }) {
+    return this.notificationModel.create({
+      user: payload.user,
+      title: payload.title,
+      body: payload.body,
+      data: payload.data || {},
+    });
+  }
+
 }

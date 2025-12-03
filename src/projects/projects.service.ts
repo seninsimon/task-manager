@@ -275,27 +275,25 @@ export class ProjectsService {
     const inviter = await this.userModel.findById(inviterId);
     if (!inviter) throw new NotFoundException("Inviter not found");
 
-    // Inviter must belong to the company
     if (!inviter.company || inviter.company.toString() !== project.company.toString()) {
       throw new ForbiddenException("You cannot invite members to this project");
     }
 
-    // Only owner or senior of COMPANY (not project) can invite
     if (!["owner", "senior"].includes(inviter.role)) {
       throw new ForbiddenException("Only owner or senior can invite users");
     }
 
     const user = await this.userModel.findOne({ email });
 
-    // CASE 1: User exists but belongs to DIFFERENT company → BLOCK
+    // EXISTING USER BUT DIFFERENT COMPANY → BLOCK
     if (user && user.company && user.company.toString() !== project.company.toString()) {
       throw new BadRequestException("User belongs to another company");
     }
 
-    // GENERATE TOKEN
+    // NEW TOKEN
     const inviteToken = crypto.randomBytes(16).toString("hex");
 
-    // CASE 2: User exists (and either no company or same company)
+    // EXISTING USER (with OR without company)
     if (user) {
       await this.inviteModel.create({
         project: projectId,
@@ -309,12 +307,8 @@ export class ProjectsService {
         user: user._id,
         title: "Project Invitation",
         body: `You were invited to join project ${project.name}`,
-        data: {
-          projectId,
-          inviteToken,
-        },
+        data: { projectId, inviteToken },
       });
-
 
       return {
         success: true,
@@ -323,13 +317,14 @@ export class ProjectsService {
       };
     }
 
-    // CASE 3: New user (not yet registered) — optional
+    // USER NOT REGISTERED
     return {
       success: true,
       message: "User not registered — send invite via email signup",
       inviteToken,
     };
   }
+
   async acceptInvite(token: string, userId: string) {
     const invite = await this.inviteModel.findOne({ inviteToken: token });
     if (!invite) throw new NotFoundException("Invalid or expired invite");

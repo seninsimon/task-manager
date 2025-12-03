@@ -1,4 +1,4 @@
-import { Controller, Post, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Param, Req, UseGuards, Body } from '@nestjs/common';
 import { InvitesService } from './invites.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
@@ -17,4 +17,14 @@ export class InvitesController {
   reject(@Req() req, @Param('token') token: string) {
     return this.invitesService.rejectInvite(req.user.id, token);
   }
-}
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':projectId/invite-by-email')
+  inviteByEmail(
+    @Param('projectId') projectId: string,
+    @Body('email') email: string,
+    @Req() req
+  ) {
+    return this.invitesService.inviteByEmail(projectId, email, req.user.userId);
+  }
+} 

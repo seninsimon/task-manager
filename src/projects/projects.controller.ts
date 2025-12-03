@@ -68,14 +68,8 @@ export class ProjectsController {
         requesterId
       );
 
-    return {
-      success: true,
-      data: employees,
-    };
+    return employees;
   }
-
-
-
 
   @UseGuards(JwtAuthGuard)
   @Post(':projectId/invite')
@@ -92,6 +86,8 @@ export class ProjectsController {
   acceptInvite(@Body('token') token: string, @Req() req) {
     return this.projectsService.acceptInvite(token, req.user.userId);
   }
+
+  
 
 
 }

@@ -12,6 +12,7 @@ import { InvitesController } from './invites.controller';
 
 import { UsersModule } from '../users/users.module';
 import { Company, CompanySchema } from 'src/company/schema/company.schema';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { Company, CompanySchema } from 'src/company/schema/company.schema';
       { name: Notification.name, schema: NotificationSchema },
       { name: Company.name, schema: CompanySchema },
     ]),
+    NotificationsModule,
   ],
   controllers: [ProjectsController, InvitesController],
   providers: [ProjectsService, InvitesService],
